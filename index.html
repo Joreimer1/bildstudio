@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bildstudio Pro - Konvertera, Skala, Beskär & Optimera Bilder</title>
+    <meta name="description" content="Ett snabbt och modernt verktyg direkt i webbläsaren för att beskära, skala om, komprimera och konvertera bilder mellan JPG, PNG, WebP, BMP och Apple HEIC. 100% gratis och privat.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Cropper CSS -->
+    <link rel="stylesheet" href="./static/css/cropper.min.css">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="./static/css/style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M4 5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H4zm16 12H4V7h16v10zM8.5 9.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm-3 6.5l3.5-4.5 2.5 3 3.5-4.5 4.5 6H5.5z'/></svg>">
+</head>
+<body class="dark-theme">
+    <!-- Background glow shapes -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="4" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">Bildstudio Pro</h1>
+                    <p class="brand-subtitle">Konvertera, skala, beskär & optimera bilder direkt i webbläsaren – 100% privat & kostnadsfritt</p>
+                </div>
+            </div>
+
+            <!-- Tab Switcher & Actions -->
+            <div class="header-actions">
+                <div class="tab-switcher">
+                    <button class="tab-btn active" id="tabSingleBtn" onclick="switchTab('single')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        Enskild Bildredigerare
+                    </button>
+                    <button class="tab-btn" id="tabBatchBtn" onclick="switchTab('batch')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                        </svg>
+                        Masskonvertering (Batch)
+                    </button>
+                </div>
+
+                <button class="btn btn-secondary btn-sm" onclick="resetApp()" title="Återställ appen och börja om">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                    Börja om
+                </button>
+            </div>
+        </header>
+
+        <!-- Notification Toast -->
+        <div id="toastNotification" class="toast-container hidden">
+            <div class="toast-icon" id="toastIcon">✓</div>
+            <div class="toast-message" id="toastMessage">Åtgärd slutförd</div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- VIEW 1: SINGLE IMAGE EDITOR -->
+        <!-- ============================================================ -->
+        <main id="singleView" class="view-panel active">
+            <!-- Empty State / Dropzone -->
+            <div id="dropzoneArea" class="dropzone-wrapper">
+                <div class="dropzone" id="dropzone">
+                    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/bmp,image/heic,image/heif,image/webp,.heic,.heif,.jpg,.jpeg,.png,.bmp,.webp" class="file-input-hidden">
+                    <div class="dropzone-icon-pulse">
+                        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <h2>Dra och släpp en bild här</h2>
+                    <p class="dropzone-desc">Stödjer direkt inläsning av <strong>JPG, PNG, BMP, HEIC / HEIF (Apple)</strong> och <strong>WebP</strong></p>
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                        Välj bild från datorn
+                    </button>
+                    <div class="dropzone-hints">
+                        <span class="hint-badge">Tips: Du kan även klistra in direkt med <kbd>Ctrl+V</kbd> / <kbd>Cmd+V</kbd></span>
+                        <span class="hint-badge" style="color: var(--accent-emerald);">🛡️ Bilderna lämnar aldrig din enhet</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Editor Workspace (shown when image is loaded) -->
+            <div id="editorWorkspace" class="editor-workspace hidden">
+                <!-- Left: Canvas & Cropping Area -->
+                <section class="editor-main-card">
+                    <!-- Top Crop & Orientation Toolbar -->
+                    <div class="canvas-toolbar">
+                        <div class="toolbar-group">
+                            <span class="toolbar-label">Aspektkvot:</span>
+                            <div class="btn-group" id="aspectRatioGroup">
+                                <button class="btn-tool active" data-ratio="NaN" title="Fritt val">Fritt</button>
+                                <button class="btn-tool" data-ratio="1" title="Kvadrat (1:1)">1:1</button>
+                                <button class="btn-tool" data-ratio="1.33333" title="Standardfoto (4:3)">4:3</button>
+                                <button class="btn-tool" data-ratio="1.77777" title="Widescreen (16:9)">16:9</button>
+                                <button class="btn-tool" data-ratio="1.5" title="Klassisk 35mm (3:2)">3:2</button>
+                                <button class="btn-tool" data-ratio="0.5625" title="Story / Reel (9:16)">9:16</button>
+                            </div>
+                        </div>
+
+                        <div class="toolbar-divider"></div>
+
+                        <div class="toolbar-group">
+                            <button class="btn-tool" id="btnRotateLeft" title="Rotera 90° vänster">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                90° Vänster
+                            </button>
+                            <button class="btn-tool" id="btnRotateRight" title="Rotera 90° höger">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                                90° Höger
+                            </button>
+                            <button class="btn-tool" id="btnFlipH" title="Spegla horisontellt">⇄ Spegla H</button>
+                            <button class="btn-tool" id="btnResetCrop" title="Återställ beskärning och rotation">↺ Återställ</button>
+                        </div>
+
+                        <div class="toolbar-right">
+                            <button class="btn btn-secondary btn-sm" onclick="openNewImage()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                                Ny bild
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Cropper Canvas Container -->
+                    <div class="canvas-wrapper">
+                        <img id="imageElement" src="" alt="Redigeringsvy">
+                    </div>
+
+                    <!-- Bottom Status Bar -->
+                    <div class="canvas-statusbar">
+                        <div class="status-item">
+                            <span class="status-label">Filnamn:</span>
+                            <span class="status-value highlight" id="statusFilename">-</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Källformat:</span>
+                            <span class="status-badge" id="statusFormat">-</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Original:</span>
+                            <span class="status-value font-mono" id="statusOrigDim">-</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Beskurna mått:</span>
+                            <span class="status-value font-mono highlight" id="statusCropDim">-</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">Originalstorlek:</span>
+                            <span class="status-value" id="statusOrigSize">-</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right: Settings & Export Sidebar -->
+                <aside class="editor-sidebar">
+                    <!-- Panel 1: Ändra Storlek / Skala -->
+                    <div class="control-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                            </div>
+                            <h3>1. Ändra storlek & skala</h3>
+                        </div>
+
+                        <!-- Procent Snabbval -->
+                        <div class="scale-presets">
+                            <span class="input-sublabel">Skala procent:</span>
+                            <div class="preset-pills">
+                                <button class="pill-btn" onclick="applyScalePercent(25)">25%</button>
+                                <button class="pill-btn" onclick="applyScalePercent(50)">50%</button>
+                                <button class="pill-btn" onclick="applyScalePercent(75)">75%</button>
+                                <button class="pill-btn active" id="scale100Btn" onclick="applyScalePercent(100)">100%</button>
+                                <button class="pill-btn" onclick="applyScalePercent(150)">150%</button>
+                                <button class="pill-btn" onclick="applyScalePercent(200)">200%</button>
+                            </div>
+                        </div>
+
+                        <!-- Pixel Inputs -->
+                        <div class="dimension-inputs">
+                            <div class="input-group">
+                                <label for="targetWidth">Bredd (px)</label>
+                                <input type="number" id="targetWidth" min="1" max="15000" class="form-input font-mono">
+                            </div>
+
+                            <button class="btn-aspect-lock active" id="aspectLockBtn" title="Lås proportioner (bibehåll bildförhållande)">
+                                <svg class="icon-locked" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <svg class="icon-unlocked" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+                            </button>
+
+                            <div class="input-group">
+                                <label for="targetHeight">Höjd (px)</label>
+                                <input type="number" id="targetHeight" min="1" max="15000" class="form-input font-mono">
+                            </div>
+                        </div>
+
+                        <!-- Snabbval vanliga upplösningar -->
+                        <div class="quick-res-section">
+                            <span class="input-sublabel">Vanliga formatmallar:</span>
+                            <div class="res-chips">
+                                <button class="chip-btn" onclick="setFixedDimension(1920, 1080)">Full HD (1920×1080)</button>
+                                <button class="chip-btn" onclick="setFixedDimension(1080, 1080)">Kvadrat (1080×1080)</button>
+                                <button class="chip-btn" onclick="setFixedDimension(1200, 0)">Webb (1200px bred)</button>
+                                <button class="chip-btn" onclick="setFixedDimension(800, 0)">E-post (800px bred)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel 2: Målformat & Konvertering -->
+                    <div class="control-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                            </div>
+                            <h3>2. Spara som format</h3>
+                        </div>
+
+                        <div class="format-grid" id="formatSelector">
+                            <button class="format-card active" data-fmt="JPEG">
+                                <span class="fmt-title">JPG</span>
+                                <span class="fmt-desc">Bäst för foton & webb</span>
+                            </button>
+                            <button class="format-card" data-fmt="PNG">
+                                <span class="fmt-title">PNG</span>
+                                <span class="fmt-desc">Förlustfri grafik</span>
+                            </button>
+                            <button class="format-card" data-fmt="BMP">
+                                <span class="fmt-title">BMP</span>
+                                <span class="fmt-desc">Windows Bitmapp</span>
+                            </button>
+                            <button class="format-card" data-fmt="WEBP">
+                                <span class="fmt-title">WebP</span>
+                                <span class="fmt-desc">Ultrakomprimerad webb</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Panel 3: Komprimering & Kvalitet -->
+                    <div class="control-card" id="compressionCard">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                            </div>
+                            <h3>3. Kvalitet & Komprimering</h3>
+                            <span class="quality-bubble" id="qualityBubble">85%</span>
+                        </div>
+
+                        <div class="quality-slider-container">
+                            <input type="range" id="qualitySlider" min="5" max="100" value="85" class="slider">
+                            <div class="slider-ticks">
+                                <span>Max komprimering (mindre fil)</span>
+                                <span>Högsta kvalitet</span>
+                            </div>
+                        </div>
+
+                        <p class="quality-guide" id="qualityGuideText">
+                            85% ger hög skärpa med mycket bra komprimering.
+                        </p>
+                    </div>
+
+                    <!-- Panel 4: Sammanfattning & Export -->
+                    <div class="control-card export-card">
+                        <div class="card-header">
+                            <div class="card-icon export-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            </div>
+                            <h3>4. Förhandsgranska & Spara</h3>
+                        </div>
+
+                        <!-- Stats Box -->
+                        <div class="stats-box">
+                            <div class="stat-col">
+                                <span class="stat-label">Ny upplösning</span>
+                                <span class="stat-main font-mono" id="statFinalRes">-</span>
+                            </div>
+                            <div class="stat-col">
+                                <span class="stat-label">Uppskattad storlek</span>
+                                <span class="stat-main font-mono highlight" id="statFinalSize">Beräknar...</span>
+                            </div>
+                            <div class="stat-col">
+                                <span class="stat-label">Storleksändring</span>
+                                <span class="stat-badge-save" id="statSavings">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Filnamn Input -->
+                        <div class="filename-input-group">
+                            <label for="customFilename">Filnamn vid sparning:</label>
+                            <div class="input-with-ext">
+                                <input type="text" id="customFilename" class="form-input" placeholder="mitt-foto">
+                                <span class="ext-badge" id="exportExtLabel">.jpg</span>
+                            </div>
+                        </div>
+
+                        <!-- Huvudknapp Ladda Ner -->
+                        <button class="btn btn-primary btn-large" id="btnDownload">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Spara & Ladda ner bild
+                        </button>
+
+                        <button class="btn btn-secondary" id="btnClipboard" onclick="copyImageToClipboard()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            Kopiera till urklipp
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </main>
+
+        <!-- ============================================================ -->
+        <!-- VIEW 2: BATCH / MASSKONVERTERING -->
+        <!-- ============================================================ -->
+        <main id="batchView" class="view-panel">
+            <div class="batch-container">
+                <div class="batch-header-card">
+                    <h2>Masskonvertera flera bilder samtidigt</h2>
+                    <p>Konvertera, skala om och optimera dussintals bilder (inklusive Apple HEIC) med ett enda klick direkt i webbläsaren.</p>
+                </div>
+
+                <div class="batch-grid">
+                    <!-- Batch Dropzone / File List -->
+                    <div class="batch-left-card">
+                        <div class="batch-dropzone" id="batchDropzone" onclick="document.getElementById('batchFileInput').click()">
+                            <input type="file" id="batchFileInput" multiple accept="image/*,.heic,.heif" class="file-input-hidden">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <h3>Välj eller släpp flera bilder här</h3>
+                            <p>Stödjer JPG, PNG, BMP, HEIC och WebP</p>
+                        </div>
+
+                        <!-- Selected files list -->
+                        <div class="batch-files-wrapper">
+                            <div class="batch-files-header">
+                                <span id="batchCountLabel">0 bilder valda</span>
+                                <button class="btn-tool text-danger" onclick="clearBatchFiles()">Rensa lista</button>
+                            </div>
+                            <div class="batch-files-list" id="batchFilesList">
+                                <div class="empty-list-placeholder">Inga bilder valda ännu.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Batch Controls & Run -->
+                    <div class="batch-right-card">
+                        <div class="control-card">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+                                </div>
+                                <h3>Konvertera alla till format:</h3>
+                            </div>
+                            <div class="format-grid" id="batchFormatSelector">
+                                <button class="format-card active" data-fmt="JPEG">JPG</button>
+                                <button class="format-card" data-fmt="PNG">PNG</button>
+                                <button class="format-card" data-fmt="BMP">BMP</button>
+                                <button class="format-card" data-fmt="WEBP">WebP</button>
+                            </div>
+                        </div>
+
+                        <div class="control-card">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                                </div>
+                                <h3>Skalning för alla bilder:</h3>
+                            </div>
+                            <div class="batch-scale-options">
+                                <label class="radio-option">
+                                    <input type="radio" name="batchScaleType" value="100" checked onchange="updateBatchScaleUI()">
+                                    <span>Behåll originalstorlek (100%)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="batchScaleType" value="percent" onchange="updateBatchScaleUI()">
+                                    <span>Skala till procent:</span>
+                                    <select id="batchScalePercentSelect" class="form-select">
+                                        <option value="75">75%</option>
+                                        <option value="50">50% (Halv storlek)</option>
+                                        <option value="25">25% (Fjärdedel)</option>
+                                    </select>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="batchScaleType" value="max_dim" onchange="updateBatchScaleUI()">
+                                    <span>Maximal bredd/höjd:</span>
+                                    <input type="number" id="batchMaxDimInput" value="1920" class="form-input inline-input" style="width: 100px;"> px
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="control-card">
+                            <div class="card-header">
+                                <div class="card-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                </div>
+                                <h3>Kvalitet: <span id="batchQualityLabel">85%</span></h3>
+                            </div>
+                            <input type="range" id="batchQualitySlider" min="10" max="100" value="85" class="slider">
+                        </div>
+
+                        <button class="btn btn-primary btn-large" id="btnRunBatch" onclick="startBatchConversion()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Konvertera alla & Ladda ner som ZIP
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bibliotek & Skript -->
+    <script src="./static/js/cropper.min.js"></script>
+    <script src="./static/js/jszip.min.js"></script>
+    <script src="./static/js/heic2any.min.js"></script>
+    <script src="./static/js/app.js"></script>
+</body>
+</html>
